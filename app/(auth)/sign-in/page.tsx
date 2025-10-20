@@ -1,30 +1,40 @@
 'use client'
 
-import {useForm} from "react-hook-form";
-import InputField from "@/components/forms/InputField";
-import {Button} from "@/components/ui/button";
-import FooterLink from "@/components/forms/FooterLink";
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import InputField from '@/components/forms/InputField';
+import FooterLink from '@/components/forms/FooterLink';
+import {signInWithEmail} from "@/lib/actions/auth.action";
+import {toast} from "sonner";
+
+import {useRouter} from "next/navigation";
 
 const SignInPage = () => {
+    const router = useRouter()
     const {
         register,
         handleSubmit,
-        control,
         formState: { errors, isSubmitting },
     } = useForm<SignInFormData>({
         defaultValues: {
             email: '',
             password: '',
         },
-        mode: 'onBlur'
-    })
-    const onSubmit= async (data: SignInFormData) => {
+        mode: 'onBlur',
+    });
+
+    const onSubmit = async (data: SignInFormData) => {
         try {
-            console.log(data)
+            const result = await signInWithEmail(data);
+            if(result.success) router.push('/');
         } catch (e) {
-            console.log(e)
+            console.error(e);
+            toast.error('Sign in failed', {
+                description: e instanceof Error ? e.message : 'Failed to sign in.'
+            })
         }
     }
+
     return (
         <>
             <h1 className='form-title'>Log In Your Account </h1>
@@ -48,13 +58,14 @@ const SignInPage = () => {
                     error={errors.password}
                     validation={{ required: 'Password is required', minLength: 8 }}
                 />
+
+                <Button type="submit" disabled={isSubmitting} className="yellow-btn w-full mt-5">
+                    {isSubmitting ? 'Signing In' : 'Sign In'}
+                </Button>
             </form>
 
-            <Button type='submit' disabled={isSubmitting} className='yellow-btn w-full mt-5'>
-                {isSubmitting ? 'Creating Account' : 'Log In'}
-            </Button>
 
-            <FooterLink text="Don't have an account?" linkText='Sign Up' href='/sign-up' />
+            <FooterLink text="Don't have an account?" linkText='Create an account' href='/sign-up' />
         </>
     )
 }
