@@ -7,12 +7,16 @@ import { cache } from 'react';
 const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
 const NEXT_PUBLIC_FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY ?? '';
 
-async function fetchJSON<T>(url: string, revalidateSeconds?: number): Promise<T> {
+async function fetchJSON<T>(url: string, revalidateSeconds?: number, timeoutMs = 10000): Promise<T> {
     const options: RequestInit & { next?: { revalidate?: number } } = revalidateSeconds
         ? { cache: 'force-cache', next: { revalidate: revalidateSeconds } }
         : { cache: 'no-store' };
 
-    const res = await fetch(url, options);
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), timeoutMs);
+    const res = await fetch(url, { ...options, signal: ctrl.signal });
+    clearTimeout(to);
+
     if (!res.ok) {
         const text = await res.text().catch(() => '');
         throw new Error(`Fetch failed ${res.status}: ${text}`);
@@ -25,7 +29,7 @@ export { fetchJSON };
 export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> {
     try {
         const range = getDateRange(5);
-        const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
+        const token = process.env.FINNHUB_API_KEY;
         if (!token) {
             throw new Error('FINNHUB API key is not configured');
         }

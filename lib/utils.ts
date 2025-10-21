@@ -32,7 +32,8 @@ export function formatMarketCapValue(marketCapUsd: number): string {
     if (marketCapUsd >= 1e12) return `$${(marketCapUsd / 1e12).toFixed(2)}T`; // Trillions
     if (marketCapUsd >= 1e9) return `$${(marketCapUsd / 1e9).toFixed(2)}B`; // Billions
     if (marketCapUsd >= 1e6) return `$${(marketCapUsd / 1e6).toFixed(2)}M`; // Millions
-    return `$${marketCapUsd.toFixed(2)}`; // Below one million, show full USD amount
+    const nf = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `$${nf.format(marketCapUsd)}`; // Below one million, show full USD amount
 }
 
 export const getDateRange = (days: number) => {
@@ -76,6 +77,7 @@ export const calculateNewsDistribution = (symbolsCount: number) => {
 export const validateArticle = (article: RawNewsArticle) =>
     article.headline && article.summary && article.url && article.datetime;
 
+
 // Get today's date string in YYYY-MM-DD format
 export const getTodayString = () => new Date().toISOString().split('T')[0];
 
@@ -98,7 +100,7 @@ export const formatArticle = (
 });
 
 export const formatChangePercent = (changePercent?: number) => {
-    if (!changePercent) return '';
+    if (changePercent == null || !Number.isFinite(changePercent)) return '';
     const sign = changePercent > 0 ? '+' : '';
     return `${sign}${changePercent.toFixed(2)}%`;
 };
