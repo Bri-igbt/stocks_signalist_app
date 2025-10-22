@@ -19,7 +19,7 @@ export const getAllUsersForNewsEmail = async (): Promise<User[]> => {
         const typedUsers = users as RawUserDoc[];
 
         return typedUsers
-            .filter((u) => Boolean(u.email) && Boolean(u.name))
+            .filter((u) => Boolean(u.email) && Boolean(u.name) && (u.id || u._id))
             .map((u) => ({
                 id: u.id || u._id?.toString() || '',
                 email: u.email as string,

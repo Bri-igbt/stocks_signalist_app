@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {useCallback, useEffect, useState} from "react"
 import {
   CommandDialog,
   CommandInput,
@@ -35,7 +35,7 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
         return () => window.removeEventListener("keydown", onKeyDown)
     }, [])
 
-    const handleSearch = async () => {
+    const handleSearch = useCallback(async () => {
         if(!isSearchMode) return setStocks(initialStocks);
 
         setLoading(true)
@@ -47,13 +47,13 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
         } finally {
             setLoading(false)
         }
-    }
+    }, [searchTerm, isSearchMode, initialStocks])
 
     const debouncedSearch = useDebounce(handleSearch, 300);
 
     useEffect(() => {
         debouncedSearch();
-    }, [searchTerm]);
+    }, [searchTerm, debouncedSearch]);
 
     const handleSelectStock = () => {
         setOpen(false);
