@@ -35,7 +35,7 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
         return () => window.removeEventListener("keydown", onKeyDown)
     }, [])
 
-    const handleSearch = useCallback(async () => {
+    const handleSearch = async () => {
         if(!isSearchMode) return setStocks(initialStocks);
 
         setLoading(true)
@@ -47,13 +47,13 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
         } finally {
             setLoading(false)
         }
-    }, [searchTerm, isSearchMode, initialStocks])
+    }
 
     const debouncedSearch = useDebounce(handleSearch, 300);
 
     useEffect(() => {
         debouncedSearch();
-    }, [searchTerm, debouncedSearch]);
+    }, [searchTerm]);
 
     const handleSelectStock = () => {
         setOpen(false);
